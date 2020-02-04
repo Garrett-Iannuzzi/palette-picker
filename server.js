@@ -42,8 +42,22 @@ app.get('/api/v1/projects/:id', async (request, response) => {
   }
 });
 
-app.get('/', (request, response) => {
-  response.send('Reached Palette Picker');
+app.get('/api/v1/projects/:id/palettes', async (request, response) => {
+  const { id } = request.params
+
+  if(!parseInt(id)) {
+    return response.status(422).json({ error: `Incorrect ID: ${id}, Required data type: <Number>`})
+  }
+
+  try {
+    const palettes = await database('palettes').where('project_id', id).select();
+    if (!palettes.length) {
+      return response.status(404).json({ error: `Project with ID of ${id} does not have any palettes` })
+    }
+    return response.status(200).json(palettes)
+  } catch (error) {
+    return response.status(500).json({ error })
+  }
 });
 
 app.listen(app.get('port'), () => {
