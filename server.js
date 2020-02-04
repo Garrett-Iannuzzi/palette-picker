@@ -83,7 +83,7 @@ app.post('/api/v1/projects', async (request, response) => {
 
   for (let requiredParam of [ 'name' ]) {
     if (!project[requiredParam]) {
-      return response.status(422).send({ error: `Expected format: { name: <String> } Your missing a ${[requiredParam]} property`});
+      return response.status(422).send({ error: `Expected format: { name: <String> }, Your missing a ${[requiredParam]} property`});
     }
   }
   try {
@@ -127,7 +127,7 @@ app.patch('/api/v1/palettes/:id', async (request, response) => {
 
   for (let i = 0; i < patchKeys.length; i++) {
     if(patchKeys[i] !== 'color_one' && patchKeys[i] !== 'color_two' && patchKeys[i] !== 'color_three' && patchKeys[i] !== 'color_four' && patchKeys[i] !== 'color_five') {
-      return response.status(422).send({ error: `Expected format: { color_one:<String>, color_two:<String>, color_three:<String>, color_four:<String>, color_five:<String>} ${patchKeys[i]} is invalid property`});
+      return response.status(422).send({ error: `Expected format: { color_one:<String>, color_two:<String>, color_three:<String>, color_four:<String>, color_five:<String>}, ${patchKeys[i]} is invalid property`});
     }
   }
 
@@ -138,6 +138,39 @@ app.patch('/api/v1/palettes/:id', async (request, response) => {
     }
     const updatedPalette = await database('palettes').where('id', id).update(patch, '*');
     return response.status(200).json(updatedPalette);
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+});
+
+app.patch('/api/v1/projects/:id', async (request, response) => {
+  const { id } = request.params;
+  const patch = request.body;
+  const patchKeys = Object.keys(patch);
+
+  if(!parseInt(id)) {
+    return response.status(422).json({ error: `Incorrect ID: ${id}, Required data type: <Number>`});
+  }
+
+  for (let requiredParam of [ 'name' ]) {
+    if (!patch[requiredParam]) {
+      return response.status(422).send({ error: `Expected format: { name:<String> }, Your missing a ${[requiredParam]} property`});
+    }
+  }
+
+  for (let i = 0; i < patchKeys.length; i++) {
+    if(patchKeys[i] !== 'name') {
+      return response.status(422).send({ error: `Expected format: { name:<String> }, ${patchKeys[i]} is invalid property`});
+    }
+  }
+
+  try {
+    const projectToPatch = await database('projects').where('id', id).select();
+    if(!projectToPatch.length) {
+      return response.status(404).json({ error: `Could not locate project: ${id}` })
+    }
+    const updatedProject = await database('projects').where('id', id).update(patch, '*');
+    return response.status(200).json(updatedProject);
   } catch (error) {
     return response.status(500).json({ error });
   }
