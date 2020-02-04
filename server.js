@@ -5,9 +5,7 @@ const environment = process.env.NODE_ENV || 'development';
 const configuration = require('./knexfile')[environment];
 const database = require('knex')(configuration);
 
-
 app.use(express.json());
-
 
 app.set('port', process.env.PORT || 3000);
 
@@ -86,6 +84,7 @@ app.post('/api/v1/projects', async (request, response) => {
       return response.status(422).send({ error: `Expected format: { name: <String> }, Your missing a ${[requiredParam]} property`});
     }
   }
+
   try {
     const id = await database('projects').insert(project, 'id');
     return response.status(201).json({ id: id[0] });
@@ -102,6 +101,7 @@ app.post('/api/v1/palettes', async (request, response) => {
       return response.status(422).send({ error: `Expected format: { name: <String>, project_id: <Number>, color_one:<String>, color_two:<String>, color_three:<String>, color_four:<String>, color_five:<String>} Your missing a ${[requiredParam]} property`});
     }
   }
+
   try {
     const id = await database('palettes').insert(palette, 'id');
     return response.status(201).json({ id: id[0] });
@@ -171,6 +171,25 @@ app.patch('/api/v1/projects/:id', async (request, response) => {
     }
     const updatedProject = await database('projects').where('id', id).update(patch, '*');
     return response.status(200).json(updatedProject);
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+});
+
+app.delete('/api/v1/projects/:id', async (request, response) => {
+  const { id } = request.params;
+
+  if(!parseInt(id)) {
+    return response.status(422).json({ error: `Incorrect ID: ${id}, Required data type: <Number>`});
+  }
+
+  try {
+    const projectToDelete = await database('projects').where('id', id).select();
+    if(!projectToDelete.length) {
+      return response.status(404).json({ error: `Could not locate project: ${id}` });
+    }
+    const item = await database('projects').where('id', id).del();
+    return response.status(200).json({ message: 'Success: Title has been removed'});
   } catch (error) {
     return response.status(500).json({ error });
   }
