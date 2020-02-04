@@ -83,11 +83,27 @@ app.post('/api/v1/projects', async (request, response) => {
 
   for (let requiredParam of [ 'name' ]) {
     if (!project[requiredParam]) {
-      return response.status(422).send({ error: `Expected format: { name: <String> } Your missing a ${[requiredParam]} property`})
+      return response.status(422).send({ error: `Expected format: { name: <String> } Your missing a ${[requiredParam]} property`});
     }
   }
   try {
     const id = await database('projects').insert(project, 'id');
+    return response.status(201).json({ id: id[0] });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+});
+
+app.post('/api/v1/palettes', async (request, response) => {
+  const palette = request.body;
+
+  for (let requiredParam of [ 'name', 'project_id', 'color_one', 'color_two', 'color_three', 'color_four', 'color_five' ]) {
+    if (!palette[requiredParam]) {
+      return response.status(422).send({ error: `Expected format: { name: <String>, project_id: <Number>, color_one:<String>, color_two:<String>, color_three:<String>, color_four:<String>, color_five:<String>} Your missing a ${[requiredParam]} property`});
+    }
+  }
+  try {
+    const id = await database('palettes').insert(palette, 'id');
     return response.status(201).json({ id: id[0] });
   } catch (error) {
     return response.status(500).json({ error });
