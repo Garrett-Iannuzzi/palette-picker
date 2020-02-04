@@ -24,8 +24,22 @@ app.get('/api/v1/projects', async (request, response) => {
   }
 });
 
-app.get('/', (request, response) => {
-  response.send('Reached Palette Picker');
+app.get('/api/v1/projects/:id', async (request, response) => {
+  const { id } = request.params
+
+  if(!parseInt(id)) {
+    return response.status(422).json({ error: `Incorrect ID: ${id}, Required data type: <Number>`})
+  }
+
+  try {
+    const project = await database('projects').where('id', id).select();
+    if (!project.length) {
+      return response.status(404).json({ error: `Could not locate project: ${id}` })
+    }
+    return response.status(200).json(project)
+  } catch (error) {
+    return response.status(500).json({ error })
+  }
 });
 
 app.get('/', (request, response) => {
