@@ -78,6 +78,22 @@ app.get('/api/v1/palettes/:id', async (request, response) => {
   }
 });
 
+app.post('/api/v1/projects', async (request, response) => {
+  const project = request.body;
+
+  for (let requiredParam of [ 'name' ]) {
+    if (!project[requiredParam]) {
+      return response.status(422).send({ error: `Expected format: { name: <String> } Your missing a ${[requiredParam]} property`})
+    }
+  }
+  try {
+    const id = await database('projects').insert(project, 'id');
+    return response.status(201).json({ id: id[0] });
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+})
+
 app.listen(app.get('port'), () => {
   console.log(`${app.locals.title} is running on http://localhost:${app.get('port')}.`);
 });
