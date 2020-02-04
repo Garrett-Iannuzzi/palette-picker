@@ -1,15 +1,27 @@
 {
   "name": "palette-picker",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
-  }
+    "express": "^4.17.1",
+    "knex": "^0.20.8",
+    "pg": "^7.18.1"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Garrett-Iannuzzi/palette-picker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Garrett-Iannuzzi/palette-picker/issues"
+  },
+  "homepage": "https://github.com/Garrett-Iannuzzi/palette-picker#readme",
+  "description": ""
 }
