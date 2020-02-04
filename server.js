@@ -189,7 +189,26 @@ app.delete('/api/v1/projects/:id', async (request, response) => {
       return response.status(404).json({ error: `Could not locate project: ${id}` });
     }
     const item = await database('projects').where('id', id).del();
-    return response.status(200).json({ message: 'Success: Title has been removed'});
+    return response.status(200).json({ message: 'Success: Project has been removed'});
+  } catch (error) {
+    return response.status(500).json({ error });
+  }
+});
+
+app.delete('/api/v1/palettes/:id', async (request, response) => {
+  const { id } = request.params;
+
+  if(!parseInt(id)) {
+    return response.status(422).json({ error: `Incorrect ID: ${id}, Required data type: <Number>`});
+  }
+
+  try {
+    const paletteToDelete = await database('palettes').where('id', id).select();
+    if(!paletteToDelete.length) {
+      return response.status(404).json({ error: `Could not locate palette: ${id}` });
+    }
+    const item = await database('palettes').where('id', id).del();
+    return response.status(200).json({ message: 'Success: Palette has been removed'});
   } catch (error) {
     return response.status(500).json({ error });
   }
