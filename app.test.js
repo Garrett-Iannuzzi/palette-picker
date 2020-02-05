@@ -90,8 +90,37 @@ describe('Server', () => {
     });
   });
 
+  describe('GET /api/v1/palettes/:id', () => {
+    it('Should return a 200 status and a single palette based on ID', async () => {
+      const expectedPalette = await database('palettes').first();
+      const { id } = expectedPalette;
+
+      const response = await request(app).get(`/api/v1/palettes/${id}`);
+      const palette = response.body[0];
+
+      expect(response.status).toBe(200);
+      expect(palette.name).toEqual(expectedPalette.name)
+    });
+
+    it('Should return a 422 and an error object that confirms data type', async () => {
+      const invalidId = 'g';
+      const response = await request(app).get(`/api/v1/palettes/${invalidId}`);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Incorrect ID: g, Required data type: <Number>`);
+    });
+
+    it('Should return a 404 and an error object saying id can not be found', async () => {
+      const invalidId = 13;
+      const response = await request(app).get(`/api/v1/palettes/${invalidId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toEqual(`Could not locate palette: 13`);
+    });
+  });
+
   describe('POST /api/v1/projects', () => {
-    it('Should POST a new project to the db', async () => {
+    it('Should return a 201 and POST a new project to the db', async () => {
       const newProject = { name: "Best Project" };
 
       const response = await request(app).post('/api/v1/projects').send(newProject);
@@ -99,6 +128,15 @@ describe('Server', () => {
       const project = projects[0];
       expect(response.status).toBe(201);
       expect(project.name).toEqual(newProject.name);
+    });
+
+    it('Should return a 422 when the request body format is incorrect', async () => {
+      const invalidProject = { type: "Best Project" };
+
+      const response = await request(app).post('/api/v1/projects').send(invalidProject);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Expected format: { name: <String> }, Your missing a name property`)
     });
   })
 
