@@ -18,5 +18,16 @@ describe('Server', () => {
     });
   });
 
+  describe('GET /api/v1/projects', () => {
+    it('Should return a 200 and all of the projects', async () => {
+      const expectedProjects = await database('projects').select();
+
+      const response = await request(app).get('/api/v1/projects');
+      const projects = response.body;
+
+      expect(response.status).toBe(200);
+      expect(projects[0].name).toEqual(expectedProjects[0].name);
+    });
+  });
 
 });
