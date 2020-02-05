@@ -315,4 +315,62 @@ describe('Server', () => {
     });
   });
 
+  describe('DELETE /api/v1/projects/:id', () => {
+    it('Should return a 200 with a success message', async () => {
+      const project = await database('projects').first();
+      const { id } = project;
+
+      const expectedResponse = { message: 'Success: Project has been removed'}
+      const response = await request(app).delete(`/api/v1/projects/${id}`);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(expectedResponse);
+    });
+
+    it('Should return a 422 and an error object that confirms data type', async () => {
+      const invalidId = 'u';
+      const response = await request(app).delete(`/api/v1/projects/${invalidId}`);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Incorrect ID: u, Required data type: <Number>`);
+    });
+
+    it('Should return a 404 and an error object saying id can not be found', async () => {
+      const invalidId = 99999;
+
+      const response = await request(app).delete(`/api/v1/projects/${invalidId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toEqual(`Could not locate project: ${invalidId}`);
+    });
+  });
+
+  describe('DELETE /api/v1/palettes/:id', () => {
+    it('Should return a 200 with a success message', async () => {
+      const palette = await database('palettes').first();
+      const { id } = palette;
+
+      const expectedResponse = { message: 'Success: Palette has been removed'}
+      const response = await request(app).delete(`/api/v1/palettes/${id}`);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(expectedResponse);
+    });
+
+    it('Should return a 422 and an error object that confirms data type', async () => {
+      const invalidId = 'u';
+      const response = await request(app).delete(`/api/v1/palettes/${invalidId}`);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Incorrect ID: u, Required data type: <Number>`);
+    });
+
+    it('Should return a 404 and an error object saying id can not be found', async () => {
+      const invalidId = 99999;
+
+      const response = await request(app).delete(`/api/v1/palettes/${invalidId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toEqual(`Could not locate palette: ${invalidId}`);
+    });
+  });
+
 });
