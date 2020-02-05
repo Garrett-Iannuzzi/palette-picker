@@ -23,7 +23,7 @@ describe('Server', () => {
 
       const response = await request(app).get('/api/v1/projects');
       const projects = response.body;
-
+      console.log(projects)
       expect(response.status).toBe(200);
       expect(projects[0].name).toEqual(expectedProjects[0].name);
     });
@@ -138,6 +138,41 @@ describe('Server', () => {
       expect(response.status).toBe(422);
       expect(response.body.error).toEqual(`Expected format: { name: <String> }, Your missing a name property`)
     });
-  })
+  });
+
+  describe('POST /api/v1/palettes', () => {
+    it('Should return a 201 and POST a new palette to the db', async () => {
+      const project = await database('projects').first();
+      const newPalette = {
+        name: 'Pretty Palette',
+        project_id: `${project.id}`,
+        color_one: "#84756",
+        color_two: "#84712",
+        color_three: "#84712",
+        color_four: "#81231",
+        color_five: "#84734",
+      }
+      const response = await request(app).post('/api/v1/palettes').send(newPalette);
+      const palette = await database('palettes').where('id', response.body.id).select();
+      expect(response.status).toBe(201);
+      expect(palette[0].name).toEqual(newPalette.name);
+    });
+
+    it('Should return a 422 when the request body format is incorrect', async () => {
+      const invalidPalette = {
+        name: 'Pretty Palette',
+        color_one: "#84756",
+        color_two: "#84712",
+        color_three: "#84712",
+        color_four: "#81231",
+        color_five: "#84734",
+      }
+
+      const response = await request(app).post('/api/v1/palettes').send(invalidPalette);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Expected format: { name: <String>, project_id: <Number>, color_one:<String>, color_two:<String>, color_three:<String>, color_four:<String>, color_five:<String>} Your missing a project_id property`)
+    });
+  });
 
 });
