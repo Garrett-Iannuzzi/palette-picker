@@ -49,7 +49,7 @@ describe('Server', () => {
       expect(response.body.error).toEqual(`Incorrect ID: f, Required data type: <Number>`);
     });
 
-    it('Should return a 404 and an error object syaing id can not be found', async () => {
+    it('Should return a 404 and an error object saying id can not be found', async () => {
       const invalidId = 700;
       const response = await request(app).get(`/api/v1/projects/${invalidId}`);
 
@@ -58,6 +58,37 @@ describe('Server', () => {
     });
   });
 
+  describe('GET /api/v1/projects/:id/palettes', () => {
+    it('Should return a 200 and all palettes based on project ID', async () => {
+      const expectedProject = await database('projects').first();
+      const { id } = expectedProject;
+      const expectedPalettes = await database('palettes').where("project_id", id).select();
+      const expectedPalette = expectedPalettes[0];
+
+      const response = await request(app).get(`/api/v1/projects/${id}/palettes`);
+      const result = response.body[0];
+
+      expect(response.status).toBe(200);
+      expect(result.name).toEqual(expectedPalette.name);
+
+    });
+
+    it('Should return a 422 and an error object that confirms data type', async () => {
+      const invalidId = 'u';
+      const response = await request(app).get(`/api/v1/projects/${invalidId}/palettes`);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Incorrect ID: u, Required data type: <Number>`);
+    });
+
+    it('Should return a 404 and an error object saying id can not be found', async () => {
+      const invalidId = 777;
+      const response = await request(app).get(`/api/v1/projects/${invalidId}/palettes`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toEqual(`Project with ID of 777 does not have any palettes`);
+    });
+  });
 
   describe('POST /api/v1/projects', () => {
     it('Should POST a new project to the db', async () => {
