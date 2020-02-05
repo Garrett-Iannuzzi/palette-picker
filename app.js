@@ -169,7 +169,7 @@ app.patch('/api/v1/palettes/:id', async (request, response) => {
         return acc;
       }, { colors: [] })
     });
-    return response.status(200).json(newPalette);
+    return response.status(200).json(newPalette[0]);
   } catch (error) {
     return response.status(500).json({ error });
   }
@@ -202,7 +202,7 @@ app.patch('/api/v1/projects/:id', async (request, response) => {
       return response.status(404).json({ error: `Could not locate project: ${id}` })
     }
     const updatedProject = await database('projects').where('id', id).update(patch, '*');
-    return response.status(200).json(updatedProject);
+    return response.status(200).json(updatedProject[0]);
   } catch (error) {
     return response.status(500).json({ error });
   }
