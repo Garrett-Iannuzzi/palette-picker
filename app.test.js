@@ -29,12 +29,41 @@ describe('Server', () => {
     });
   });
 
+  describe('GET /api/v1/projects/:id', () => {
+    it('Should return a 200 and a project based on ID', async () => {
+      const expectedProject = await database('projects').first();
+      const { id } = expectedProject;
+
+      const response = await request(app).get(`/api/v1/projects/${id}`);
+      const result = response.body[0];
+
+      expect(response.status).toBe(200);
+      expect(result.name).toEqual(expectedProject.name);
+    });
+
+    it('Should return a 422 and an error object that confirms data type', async () => {
+      const invalidId = 'f';
+      const response = await request(app).get(`/api/v1/projects/${invalidId}`);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Incorrect ID: f, Required data type: <Number>`);
+    });
+
+    it('Should return a 404 and an error object syaing id can not be found', async () => {
+      const invalidId = 700;
+      const response = await request(app).get(`/api/v1/projects/${invalidId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toEqual(`Could not locate project: 700`);
+    });
+  });
+
 
   describe('POST /api/v1/projects', () => {
     it('Should POST a new project to the db', async () => {
       const newProject = { name: "Best Project" };
 
-      const response = await request(app).post('/api/v1/projects  ').send(newProject);
+      const response = await request(app).post('/api/v1/projects').send(newProject);
       const projects = await database('projects').where('id', response.body.id).select();
       const project = projects[0];
       expect(response.status).toBe(201);

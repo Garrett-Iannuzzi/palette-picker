@@ -27,7 +27,7 @@ exports.seed = async (knex) => {
         project_id: projectId[0]
       }
     ])
-} catch (error) {
-  console.log({ error: `${error}` })
-}
+  } catch (error) {
+    console.log({ error: `${error}` })
+  }
 };
