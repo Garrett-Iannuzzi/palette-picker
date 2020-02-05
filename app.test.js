@@ -1,4 +1,3 @@
-// require("@babel/polyfill");
 const request = require('supertest');
 const app = require('./app');
 
@@ -29,5 +28,18 @@ describe('Server', () => {
       expect(projects[0].name).toEqual(expectedProjects[0].name);
     });
   });
+
+
+  describe('POST /api/v1/projects', () => {
+    it('Should POST a new project to the db', async () => {
+      const newProject = { name: "Best Project" };
+
+      const response = await request(app).post('/api/v1/projects  ').send(newProject);
+      const projects = await database('projects').where('id', response.body.id).select();
+      const project = projects[0];
+      expect(response.status).toBe(201);
+      expect(project.name).toEqual(newProject.name);
+    });
+  })
 
 });
