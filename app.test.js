@@ -23,7 +23,6 @@ describe('Server', () => {
 
       const response = await request(app).get('/api/v1/projects');
       const projects = response.body;
-      console.log(projects)
       expect(response.status).toBe(200);
       expect(projects[0].name).toEqual(expectedProjects[0].name);
     });
@@ -173,6 +172,84 @@ describe('Server', () => {
       expect(response.status).toBe(422);
       expect(response.body.error).toEqual(`Expected format: { name: <String>, project_id: <Number>, color_one:<String>, color_two:<String>, color_three:<String>, color_four:<String>, color_five:<String>} Your missing a project_id property`)
     });
+  });
+
+  describe('PATCH /api/v1/palettes/:id', () => {
+    it('Should return a 200 with the newly patched palette', async () => {
+      const palette = await database('palettes').first();
+      const { id } = palette;
+      const patch = {
+        color_one: "#84756",
+        color_two: "#84712",
+        color_three: "#84712",
+        color_four: "#81231",
+        color_five: "#84734"
+      }
+
+      const response = await request(app).patch(`/api/v1/palettes/${id}`).send(patch);
+      const updatedPalettes = await database('palettes').where('id', id).select();
+      const updatedPalette = updatedPalettes[0];
+      expect(response.status).toBe(200);
+      expect(response.body.colors[0]).toEqual(updatedPalette.color_one);
+    });
+
+    it('Should return a 422 and an error object that confirms data type', async () => {
+      const invalidId = 'u';
+      const response = await request(app).patch(`/api/v1/palettes/${invalidId}`);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Incorrect ID: u, Required data type: <Number>`);
+    });
+
+    it('Should return a 422 when the request body format is incorrect', async () => {
+      const palette = await database('palettes').first();
+      const { id } = palette;
+      const invalidPatch = {
+        color_two: "#84712",
+        color_three: "#84712",
+        color_four: "#81231",
+        color_five: "#84734"
+      }
+
+      const response = await request(app).patch(`/api/v1/palettes/${id}`).send(invalidPatch);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Expected format: { color_one:<String>, color_two:<String>, color_three:<String>, color_four:<String>, color_five:<String>} Your missing a color_one property`)
+    });
+
+    it('Should return a 422 when the request body format is incorrect', async () => {
+      const palette = await database('palettes').first();
+      const { id } = palette;
+      const invalidPatch = {
+        name: 'Palette time',
+        color_one: "#84756",
+        color_two: "#84712",
+        color_three: "#84712",
+        color_four: "#81231",
+        color_five: "#84734"
+      }
+
+      const response = await request(app).patch(`/api/v1/palettes/${id}`).send(invalidPatch);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Expected format: { color_one:<String>, color_two:<String>, color_three:<String>, color_four:<String>, color_five:<String>}, name is invalid property`);
+    });
+
+    it('Should return a 404 and an error object saying id can not be found', async () => {
+      const invalidId = 99999;
+      const patch = {
+        color_one: "#84756",
+        color_two: "#84712",
+        color_three: "#84712",
+        color_four: "#81231",
+        color_five: "#84734"
+      }
+      const response = await request(app).patch(`/api/v1/palettes/${invalidId}`).send(patch);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toEqual(`Could not locate palette: ${invalidId}`);
+    });
+
   });
 
 });
