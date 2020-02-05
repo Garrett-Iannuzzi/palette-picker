@@ -52,7 +52,18 @@ app.get('/api/v1/projects/:id/palettes', async (request, response) => {
     if(!palettes.length) {
       return response.status(404).json({ error: `Project with ID of ${id} does not have any palettes` });
     }
-    return response.status(200).json(palettes);
+    const newPalettes = palettes.map(palette => {
+      const paletteKeys = Object.keys(palette);
+      return paletteKeys.reduce((acc, key) => {
+        if (key.includes('color')) {
+          acc.colors.push(palette[key]);
+        } else {
+          acc[key] = palette[key];
+        }
+        return acc;
+      }, { colors: [] })
+    });
+    return response.status(200).json(newPalettes);
   } catch (error) {
     return response.status(500).json({ error });
   }
@@ -65,12 +76,23 @@ app.get('/api/v1/palettes/:id', async (request, response) => {
     return response.status(422).json({ error: `Incorrect ID: ${id}, Required data type: <Number>`})
   }
 
-  try { 
+  try {
     const palette = await database('palettes').where('id', id).select();
     if(!palette.length) {
       return response.status(404).json({ error: `Could not locate palette: ${id}` });
     }
-    return response.status(200).json(palette);
+    const newPalette = palette.map(palette => {
+      const paletteKeys = Object.keys(palette);
+      return paletteKeys.reduce((acc, key) => {
+        if (key.includes('color')) {
+          acc.colors.push(palette[key]);
+        } else {
+          acc[key] = palette[key];
+        }
+        return acc;
+      }, { colors: [] })
+    });
+    return response.status(200).json(newPalette);
   } catch (error) {
     return response.status(500).json({ error });
   }
