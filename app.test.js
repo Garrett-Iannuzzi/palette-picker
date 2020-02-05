@@ -249,7 +249,70 @@ describe('Server', () => {
       expect(response.status).toBe(404);
       expect(response.body.error).toEqual(`Could not locate palette: ${invalidId}`);
     });
+  });
 
+  describe('PATCH /api/v1/projects/:id', () => {
+    it('Should return a 200 with the newly patched palette', async () => {
+      const project = await database('projects').first();
+      const { id } = project;
+      const patch = {
+        name: 'Project Project'
+      }
+
+      const response = await request(app).patch(`/api/v1/projects/${id}`).send(patch);
+      const updatedProjects = await database('projects').where('id', id).select();
+      const updatedProject = updatedProjects[0];
+
+      expect(response.status).toBe(200);
+      expect(response.body.name).toEqual(updatedProject.name);
+    });
+
+    it('Should return a 422 and an error object that confirms data type', async () => {
+      const invalidId = 'u';
+      const response = await request(app).patch(`/api/v1/projects/${invalidId}`);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Incorrect ID: u, Required data type: <Number>`);
+    });
+
+    it('Should return a 422 when the request body format is incorrect', async () => {
+      const project = await database('projects').first();
+      const { id } = project;
+      const patch = {
+        type: 'Project Project'
+      }
+
+      const response = await request(app).patch(`/api/v1/projects/${id}`).send(patch);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Expected format: { name:<String> }, Your missing a name property`)
+    });
+
+    it('Should return a 422 when the request body format is incorrect', async () => {
+      const project = await database('projects').first();
+      const { id } = project;
+      const invalidPatch = {
+        name: 'Project Project',
+        id: 23
+      }
+
+      const response = await request(app).patch(`/api/v1/projects/${id}`).send(invalidPatch);
+
+      expect(response.status).toBe(422);
+      expect(response.body.error).toEqual(`Expected format: { name:<String> }, id is invalid property`);
+    });
+
+    it('Should return a 404 and an error object saying id can not be found', async () => {
+      const invalidId = 99999;
+      const patch = {
+        name: 'Project Project'
+      }
+
+      const response = await request(app).patch(`/api/v1/projects/${invalidId}`).send(patch);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toEqual(`Could not locate project: ${invalidId}`);
+    });
   });
 
 });
