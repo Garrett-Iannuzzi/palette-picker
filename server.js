@@ -159,7 +159,18 @@ app.patch('/api/v1/palettes/:id', async (request, response) => {
       return response.status(404).json({ error: `Could not locate palette: ${id}` })
     }
     const updatedPalette = await database('palettes').where('id', id).update(patch, '*');
-    return response.status(200).json(updatedPalette);
+    const newPalette = updatedPalette.map(palette => {
+      const paletteKeys = Object.keys(palette);
+      return paletteKeys.reduce((acc, key) => {
+        if (key.includes('color')) {
+          acc.colors.push(palette[key]);
+        } else {
+          acc[key] = palette[key];
+        }
+        return acc;
+      }, { colors: [] })
+    });
+    return response.status(200).json(newPalette);
   } catch (error) {
     return response.status(500).json({ error });
   }
