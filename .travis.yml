@@ -5,3 +5,5 @@ node_js:
   - postgresql
 before_script:
   - psql -c 'CREATE DATABASE palettepicker;' -U postgres
+notifications:
+  email: false
