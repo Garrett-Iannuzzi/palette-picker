@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors')
 const app = express();
 
 const environment = process.env.NODE_ENV || 'development';
@@ -7,6 +8,7 @@ const database = require('knex')(configuration);
 
 app.locals.title = 'Palette Picker';
 app.use(express.json());
+app.use(cors());
 
 app.get('/', (request, response) => {
   response.send('Reached Palette Picker');
