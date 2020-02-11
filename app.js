@@ -1,5 +1,4 @@
 const express = require('express');
-const cors = require('cors')
 const app = express();
 
 const environment = process.env.NODE_ENV || 'development';
@@ -8,7 +7,6 @@ const database = require('knex')(configuration);
 
 app.locals.title = 'Palette Picker';
 app.use(express.json());
-app.use(cors());
 
 app.get('/', (request, response) => {
   response.send('Reached Palette Picker');
@@ -96,6 +94,48 @@ app.get('/api/v1/palettes/:id', async (request, response) => {
     return response.status(200).json(newPalette);
   } catch (error) {
     return response.status(500).json({ error });
+  }
+});
+
+app.get('/api/v1/palettes', async (request, response) => {
+  const hexArray = request.query.hexcode.split('');
+  if (hexArray.length < 5 || hexArray.length > 6) {
+    return response.status(404).json({ error: `Please provide 5-6 digit hexcode` });
+  }
+  if (hexArray.length === 5 || hexArray.length === 6) {
+    try {
+      const palettes = await database('palettes').select();
+      if(!palettes.length) {
+        return response.status(404).json({ error: `There are currently no saved pallets` });
+      }
+      const newPalettes = palettes.map(palette => {
+        const paletteKeys = Object.keys(palette);
+        return paletteKeys.reduce((acc, key) => {
+          if (key.includes('color')) {
+            acc.colors.push(palette[key]);
+          } else {
+            acc[key] = palette[key];
+          }
+          return acc;
+        }, { colors: [] })
+      });
+      const filteredPalettes = newPalettes.filter(palette => {
+        const checkColors = palette.colors.map(color => {
+          if (color.includes(request.query.hexcode)) {
+            return true;
+          } else {
+            return palette
+          }
+        });
+        return checkColors.includes(true)
+      });
+      if(!filteredPalettes.length) {
+        return response.status(404).json({ error: `No palettes with the hexcode of ${request.query.hexcode} exist` });
+      }
+      return response.status(200).json(filteredPalettes);
+    } catch(error) {
+      return response.status(500).json({ error });
+    }
   }
 });
 
