@@ -118,6 +118,37 @@ describe('Server', () => {
     });
   });
 
+  describe('GET /api/v1/palettes', () => {
+    it('Should return a 200 and GET palettes by hexcode', async () => {
+      const expectedPalette = await database('palettes').first();
+      const { color_one } = expectedPalette;
+      const colorArray = color_one.split('')
+      colorArray.shift();
+      const hexcode = colorArray.join('');
+      const response = await request(app).get(`/api/v1/palettes?hexcode=${hexcode}`);
+      const palette = response.body[0];
+
+      expect(response.status).toBe(200);
+      expect(palette.name).toEqual(expectedPalette.name)
+    });
+
+    it('Should return a 404 and an error object saying provide 5-6 digit hexcode', async () => {
+      const invalidHexCode = 133;
+      const response = await request(app).get(`/api/v1/palettes?hexcode=${invalidHexCode}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toEqual(`Invalid hexcode: 133. Please provide 5-6 digit hexcode`);
+    });
+
+    it('Should return a 404 and an error object saying provide 5-6 digit hexcode', async () => {
+      const invalidHexCode = 13342;
+      const response = await request(app).get(`/api/v1/palettes?hexcode=${invalidHexCode}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toEqual(`No palettes with the hexcode of 13342 exist`);
+    });
+  });
+
   describe('POST /api/v1/projects', () => {
     it('Should return a 201 and POST a new project to the db', async () => {
       const newProject = { name: "Best Project" };
