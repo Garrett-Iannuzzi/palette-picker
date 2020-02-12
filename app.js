@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 
 const environment = process.env.NODE_ENV || 'development';
 const configuration = require('./knexfile')[environment];
@@ -7,6 +8,7 @@ const database = require('knex')(configuration);
 
 app.locals.title = 'Palette Picker';
 app.use(express.json());
+app.use(cors());
 
 const reformatPaletteColors = palettes => {
   return palettes.map(palette => {
