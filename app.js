@@ -1,5 +1,4 @@
 const express = require('express');
-const cors = require('cors')
 const app = express();
 
 const environment = process.env.NODE_ENV || 'development';
@@ -8,7 +7,20 @@ const database = require('knex')(configuration);
 
 app.locals.title = 'Palette Picker';
 app.use(express.json());
-app.use(cors());
+
+const reformatPaletteColors = palettes => {
+  return palettes.map(palette => {
+    const paletteKeys = Object.keys(palette);
+    return paletteKeys.reduce((acc, key) => {
+      if (key.includes('color')) {
+        acc.colors.push(palette[key]);
+      } else {
+        acc[key] = palette[key];
+      }
+      return acc;
+    }, { colors: [] });
+  });
+}
 
 app.get('/', (request, response) => {
   response.send('Reached Palette Picker');
@@ -53,17 +65,8 @@ app.get('/api/v1/projects/:id/palettes', async (request, response) => {
     if(!palettes.length) {
       return response.status(404).json({ error: `Project with ID of ${id} does not have any palettes` });
     }
-    const newPalettes = palettes.map(palette => {
-      const paletteKeys = Object.keys(palette);
-      return paletteKeys.reduce((acc, key) => {
-        if (key.includes('color')) {
-          acc.colors.push(palette[key]);
-        } else {
-          acc[key] = palette[key];
-        }
-        return acc;
-      }, { colors: [] })
-    });
+
+    const newPalettes = reformatPaletteColors(palettes);
     return response.status(200).json(newPalettes);
   } catch (error) {
     return response.status(500).json({ error });
@@ -82,20 +85,40 @@ app.get('/api/v1/palettes/:id', async (request, response) => {
     if(!palette.length) {
       return response.status(404).json({ error: `Could not locate palette: ${id}` });
     }
-    const newPalette = palette.map(palette => {
-      const paletteKeys = Object.keys(palette);
-      return paletteKeys.reduce((acc, key) => {
-        if (key.includes('color')) {
-          acc.colors.push(palette[key]);
-        } else {
-          acc[key] = palette[key];
-        }
-        return acc;
-      }, { colors: [] })
-    });
-    return response.status(200).json(newPalette);
+    const newPalettes = reformatPaletteColors(palette);
+    return response.status(200).json(newPalettes);
   } catch (error) {
     return response.status(500).json({ error });
+  }
+});
+
+app.get('/api/v1/palettes', async (request, response) => {
+  const hexcode = request.query.hexcode;
+  const hexArray = hexcode.split('');
+  if (hexArray.length < 5 || hexArray.length > 6) {
+    return response.status(404).json({ error: `Invalid hexcode: ${hexcode}. Please provide 5-6 digit hexcode` });
+  }
+  if (hexArray.length === 5 || hexArray.length === 6) {
+    try {
+      const palettes = await database('palettes').select();
+      const newPalettes = reformatPaletteColors(palettes);
+      const filteredPalettes = newPalettes.filter(palette => {
+        const checkColors = palette.colors.map(color => {
+          if (color.includes(hexcode)) {
+            return true;
+          } else {
+            return palette
+          }
+        });
+        return checkColors.includes(true)
+      });
+      if(!filteredPalettes.length) {
+        return response.status(404).json({ error: `No palettes with the hexcode of ${hexcode} exist` });
+      }
+      return response.status(200).json(filteredPalettes);
+    } catch(error) {
+      return response.status(500).json({ error });
+    }
   }
 });
 
@@ -160,18 +183,8 @@ app.patch('/api/v1/palettes/:id', async (request, response) => {
       return response.status(404).json({ error: `Could not locate palette: ${id}` })
     }
     const updatedPalette = await database('palettes').where('id', id).update(patch, '*');
-    const newPalette = updatedPalette.map(palette => {
-      const paletteKeys = Object.keys(palette);
-      return paletteKeys.reduce((acc, key) => {
-        if (key.includes('color')) {
-          acc.colors.push(palette[key]);
-        } else {
-          acc[key] = palette[key];
-        }
-        return acc;
-      }, { colors: [] })
-    });
-    return response.status(200).json(newPalette[0]);
+    const newPalettes = reformatPaletteColors(updatedPalette);
+    return response.status(200).json(newPalettes[0]);
   } catch (error) {
     return response.status(500).json({ error });
   }
