@@ -9,6 +9,8 @@ Palette Picker lets a user create color palettes for any project they may be wor
 
 This project was completed over 12 days at the Turing School for Software and Design. You can find coresponding FE repo here [Palette Picker FE](https://github.com/adamsjr8576/palette-picker-fe).
 
+We used a project board to manage our sprints, that board can be found [here](https://github.com/Garrett-Iannuzzi/palette-picker/projects/1).
+
 ## Tech Stack:
 - Express.js
 - Knex
