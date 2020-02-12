@@ -1,8 +1,8 @@
 # Palette Picker 
 
 ## Creators
-- Garrett Iannuzzi - ![github](https://github.com/Garrett-Iannuzzi)
-- John Adams - ![github](https://github.com/adamsjr8576)
+- Garrett Iannuzzi - [github](https://github.com/Garrett-Iannuzzi)
+- John Adams - [github](https://github.com/adamsjr8576)
 
 ## Overview:
 Palette Picker lets a user create color palettes for any project they may be working on. The user has the ability to save projects and palettes for those projects. The user can also edit/update saved projects and color palettes, and delete projects and palettes.
