@@ -1,14 +1,33 @@
 # Palette Picker 
 
-### Overview:
+## Creators
+- Garrett Iannuzzi - github
+- John Adams - github
 
-### Tech Stack:
+## Overview:
+Palette Picker lets a user create color palettes for any project they may be working on. The user has the ability to save projects and palettes for those projects. The user can also edit/update saved projects and color palettes, and delete projects and palettes.
 
-### Deployment Information: 
+This project was completed over 12 days at the Turing School for Software and Design. You can find coresponding FE repo here.
 
-### Setup:
+## Tech Stack:
+- Express.js
+- Knex
+- Node.js
+- JavaScript
+- Postgres
+- Jest / Enzyme
 
-### Endpoints:
+## Setup:
+1. Clone doen the repo Palette Picker
+2. Run `npm install`
+3. Run `npm start`
+
+## Endpoints:
+
+All URLs have the following base URLs:
+
+- http://localhost:3000 for the local enviornment
+- https://palette-selector.herokuapp.com for the remote version.
 
 |  **Purpose** 	| **Prefix For All URL's: `http://localhost:3000/`**  	| **Verb**  	| **Request Body**  	|   **Sample Success Response** |
 |---	|---	|---	|---	|---	|
